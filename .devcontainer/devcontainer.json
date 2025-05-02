@@ -12,13 +12,16 @@
       "version": "latest",
       "moby": true
     },
-    "ghcr.io/mikaello/devcontainer-features/modern-shell-utils:2.0.0": {}
+    "ghcr.io/mikaello/devcontainer-features/modern-shell-utils:2.0.0": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "minikube": "none"
+    },
+    "ghcr.io/eitsupi/devcontainer-features/jq-likes:2": {
+      "yqVersion": "latest"
+    }
   },
   "postCreateCommand": "./.devcontainer/postCreateCommand.sh",
   "customizations": {
-    // "devpod": {
-    //   "prebuildRepository": "ghcr.io/loft-sh/devpod-kubebuilder-template"
-    // },
     "vscode": {
       "extensions": [
         "golang.go",
