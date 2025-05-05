@@ -42,6 +42,7 @@ Simply point `KUBECONFIG` to `.kind/.kind/kind-config` and use `kubectl` as usua
 > [!NOTE]
 > On linux, Podman and rootless Docker have been found to cause issues.
 > Ensure that you are using **rootful Docker** to save yourself loads of trouble.
+> Next to **rootful Docker** you will also have to install **Docker buildx**.
 >
 > Additionally, on Fedora, you might encounter issues with `iptables`.
 > Execute the following on the host prior to building the devcontainer:
