@@ -1,0 +1,74 @@
+{
+  "name": "AppCat Devcontainer",
+  "build": {
+    "dockerfile": "./Dockerfile"
+  },
+  "forwardPorts": [
+    8088,
+    8443
+  ],
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true
+    },
+    "ghcr.io/mikaello/devcontainer-features/modern-shell-utils:2.0.0": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "minikube": "none"
+    },
+    "ghcr.io/eitsupi/devcontainer-features/jq-likes:2": {
+      "yqVersion": "latest"
+    }
+  },
+  "postCreateCommand": "./.devcontainer/postCreateCommand.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "ms-vscode.makefile-tools",
+        "redhat.vscode-yaml",
+        "timonwong.shellcheck",
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "Grafana.vscode-jsonnet"
+      ],
+      "settings": {
+        // This has to be set individually to each developers preference
+        // in their local vscode configs.
+        // "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+          },
+          "zsh": {
+            "path": "zsh"
+          },
+          "fish": {
+            "path": "fish"
+          },
+          "tmux": {
+            "path": "tmux",
+            "icon": "terminal-tmux"
+          },
+          "pwsh": {
+            "path": "pwsh",
+            "icon": "terminal-powershell"
+          }
+        },
+        // Some jsonnet configs for the languageServer
+        "jsonnet.languageServer.lint": true,
+        "jsonnet.languageServer.tankaMode": false,
+        "jsonnet.languageServer.formatting": {
+          "PadArrays": true
+        },
+        "jsonnet.languageServer.jpath": [
+          "lib/"
+        ],
+        "jsonnet.libPaths": [
+          "/lib"
+        ]
+      }
+    }
+  }
+}
