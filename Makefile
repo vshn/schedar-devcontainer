@@ -7,7 +7,7 @@ help: ## Display this help.
 clone-all: ## Initialize all git submodules
 	if git submodule status | grep --quiet '^-'; then \
 		git submodule init ; \
-		git submodule update ; \
+		git submodule update --remote ; \
 	fi
 
 clean-container: ## Delete all submodules
