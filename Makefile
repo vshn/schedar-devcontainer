@@ -5,9 +5,9 @@ help: ## Display this help.
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 clone-all: ## Initialize all git submodules
-	git -C appcat pull || git clone https://github.com/vshn/appcat
-	git -C component-appcat pull || git clone https://github.com/vshn/component-appcat
-	git -C kindev pull || git clone https://github.com/vshn/kindev
+	git -C appcat pull || git clone git@github.com:vshn/appcat
+	git -C component-appcat pull || git clone git@github.com:vshn/component-appcat
+	git -C kindev pull || git clone git@github.com:vshn/kindev
 
 clean-container: ## Delete all submodules
 	rm -rf appcat component-appcat kindev
