@@ -30,7 +30,8 @@
         "timonwong.shellcheck",
         "eamodio.gitlens",
         "mhutchie.git-graph",
-        "Grafana.vscode-jsonnet"
+        "Grafana.vscode-jsonnet",
+        "asciidoctor.asciidoctor-vscode"
       ],
       "settings": {
         // This has to be set individually to each developers preference
