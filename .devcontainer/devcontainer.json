@@ -5,7 +5,8 @@
   },
   "forwardPorts": [
     8088,
-    8443
+    8443,
+    36377
   ],
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
