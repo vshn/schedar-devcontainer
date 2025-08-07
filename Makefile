@@ -7,10 +7,17 @@ help: ## Display this help.
 clone-all: ## Initialize all git submodules
 	git -C appcat pull || git clone git@github.com:vshn/appcat || true
 	git -C component-appcat pull || git clone git@github.com:vshn/component-appcat || true
+	git -C component-spks-crossplane pull || git clone git@git.vshn.net:swisscompks/component-spks-crossplane.git || true
+	git -C component-exporter-filterproxy pull || git clone git@github.com:vshn/component-exporter-filterproxy.git || true
 	git -C kindev pull || git clone git@github.com:vshn/kindev || true
 
 clean-container: ## Delete all submodules
-	rm -rf appcat component-appcat kindev
+	rm -rf appcat component-appcat component-spks-crossplane kindev
+
+setup-spks: ## Setup spks kindev environment
+	cd kindev && \
+	make spks
+	cp kindev/.kind/kind-config ~/.kube/config
 
 setup-kindev: ## Setup kindev environment
 	cd kindev && \
@@ -42,4 +49,18 @@ push-non-converged: ## Push AppCat configuration non-converged mode to local for
 	make push-non-converged
 
 
-
+push-spks: DEBUG=true
+push-spks:
+	yq '.parameters.spks_crossplane.proxyFunction |= $(DEBUG)' component-spks-crossplane/tests/control-plane.yml | diff -B component-spks-crossplane/tests/control-plane.yml - | patch component-spks-crossplane/tests/control-plane.yml -
+	cd component-spks-crossplane && \
+	make push-non-converged && \
+	cd ../kindev && \
+	export serviceCluster=$$(make vcluster-host-kubeconfig | grep -v "Leaving" | grep -v "Entering") && \
+	export controlCluster=$$(make vcluster-in-cluster-kubeconfig | grep -v 'make' | grep -v "Entering") && \
+	cd .. && \
+	yq '.parameters.spks_crossplane.clusterManagementSystem.serviceClusterKubeconfigs[0].config |= strenv(serviceCluster)' component-spks-crossplane/tests/control-plane.yml | diff -B component-spks-crossplane/tests/control-plane.yml - | patch component-spks-crossplane/tests/control-plane.yml - && \
+	yq '.parameters.spks_crossplane.clusterManagementSystem.controlPlaneKubeconfig |= strenv(controlCluster)' component-spks-crossplane/tests/service-cluster.yml | diff -B component-spks-crossplane/tests/service-cluster.yml - | patch component-spks-crossplane/tests/service-cluster.yml - && \
+	cd component-spks-crossplane && \
+	make push-non-converged && \
+	cd ../component-exporter-filterproxy && \
+	make push-non-converged
