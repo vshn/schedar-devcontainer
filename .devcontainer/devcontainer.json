@@ -19,7 +19,8 @@
     },
     "ghcr.io/eitsupi/devcontainer-features/jq-likes:2": {
       "yqVersion": "latest"
-    }
+    },
+    "ghcr.io/devcontainers/features/nix:1": {}
   },
   "postCreateCommand": "./.devcontainer/postCreateCommand.sh",
   "customizations": {
