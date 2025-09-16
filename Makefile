@@ -55,8 +55,8 @@ push-spks:
 	cd component-spks-crossplane && \
 	make push-non-converged && \
 	cd ../kindev && \
-	export serviceCluster=$$(make vcluster-host-kubeconfig | grep -v "Leaving" | grep -v "Entering") && \
-	export controlCluster=$$(make vcluster-in-cluster-kubeconfig | grep -v 'make' | grep -v "Entering") && \
+	export serviceCluster=$$(make vcluster-host-kubeconfig appcat_namespace=spks-crossplane | grep -v "Leaving" | grep -v "Entering") && \
+	export controlCluster=$$(make vcluster-in-cluster-kubeconfig appcat_namespace=spks-crossplane | grep -v 'make' | grep -v "Entering") && \
 	cd .. && \
 	yq '.parameters.spks_crossplane.clusterManagementSystem.serviceClusterKubeconfigs[0].config |= strenv(serviceCluster)' component-spks-crossplane/tests/control-plane.yml | diff -B component-spks-crossplane/tests/control-plane.yml - | patch component-spks-crossplane/tests/control-plane.yml - && \
 	yq '.parameters.spks_crossplane.clusterManagementSystem.controlPlaneKubeconfig |= strenv(controlCluster)' component-spks-crossplane/tests/service-cluster.yml | diff -B component-spks-crossplane/tests/service-cluster.yml - | patch component-spks-crossplane/tests/service-cluster.yml - && \
