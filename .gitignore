@@ -1,5 +1,9 @@
-appcat/
-component-appcat/
-kindev/
-.zed/
-.vscode/
+# Ignore all subfolders
+/*
+
+# Except devcontainer
+!.devcontainer/
+!.gitignore
+!Makefile
+!README.md
+!renovate.json
