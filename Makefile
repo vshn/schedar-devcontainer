@@ -29,8 +29,10 @@ clean-kindev: ## Clean kindev
 	make clean
 
 push-golden: DEBUG=true
+push-golden: HOST=$(shell docker inspect kindev-control-plane | jq '.[0].NetworkSettings.Networks.kind.Gateway')
 push-golden: ## Push AppCat configuration converged mode to local forgejo. By default it will try to connect to AppCat running in debug mode. Use `-e DEBUG=false` to run against containers in the cluster
 	yq '.parameters.appcat.proxyFunction |= $(DEBUG)' component-appcat/tests/dev.yml | diff -B component-appcat/tests/dev.yml - | patch component-appcat/tests/dev.yml -
+	yq '.parameters.appcat.grpcEndpoint |= $(HOST)' component-appcat/tests/dev.yml | diff -B component-appcat/tests/dev.yml - | patch component-appcat/tests/dev.yml -
 	cd component-appcat && \
 	make push-golden
 
