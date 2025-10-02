@@ -1,8 +1,8 @@
 # Schedar-devcontainer
 
-This repo combines our various repositories into one, for a better dev UX.
+This repo combines our various appcat-related repositories into one, for a better dev UX.
 
-Just clone this repo, open it with a devcontainer compatible IDE and start the devcontainer.
+Just clone this repo and run `make clone-all`. This will clone all appcat-related repositories for a working development setup. Then open this repository with a devcontainer-compatible IDE and start the devcontainer.
 
 After the container has started, chose a deployment method:
 
