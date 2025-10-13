@@ -72,3 +72,13 @@ After that set this configuration in vscode:
   "dotfiles.installCommand": "install.sh"
 }
 ```
+
+### Keycloak testing
+
+To test keycloak service one must create `.inventage_credentials` with the following format:
+```
+inventage_registry_password=<pass>
+inventage_registry_username=<username>
+```
+
+The credentials are available in vault
