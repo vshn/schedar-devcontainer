@@ -40,8 +40,10 @@ push-golden: ## Push AppCat configuration converged mode to local forgejo. By de
 	$(MAKE) patch-keycloak-composition FORGEJO_REPO=gitea_admin/appcat
 
 push-non-converged: DEBUG=true
+push-non-converged: HOST=$(shell docker inspect kindev-control-plane | jq '.[0].NetworkSettings.Networks.kind.Gateway')
 push-non-converged: ## Push AppCat configuration non-converged mode to local forgejo. By default it will try to connect to AppCat running in debug mode. Use `-e DEBUG=false` to run against containers in the cluster
 	yq '.parameters.appcat.proxyFunction |= $(DEBUG)' component-appcat/tests/control-plane.yml | diff -B component-appcat/tests/control-plane.yml - | patch component-appcat/tests/control-plane.yml -
+	yq '.parameters.appcat.grpcEndpoint |= $(HOST)+":9443"' component-appcat/tests/control-plane.yml | diff -B component-appcat/tests/control-plane.yml - | patch component-appcat/tests/control-plane.yml -
 	cd component-appcat && \
 	make push-non-converged && \
 	cd ../kindev && \
