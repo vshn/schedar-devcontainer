@@ -10,6 +10,7 @@ clone-all: ## Initialize all git submodules
 	git -C component-spks-crossplane pull || git clone git@git.vshn.net:swisscompks/component-spks-crossplane.git || true
 	git -C component-exporter-filterproxy pull || git clone git@github.com:vshn/component-exporter-filterproxy.git || true
 	git -C kindev pull || git clone git@github.com:vshn/kindev || true
+	git -C appcat-charts pull || git clone git@github.com:vshn/appcat-charts || true
 
 clean-container: ## Delete all submodules
 	rm -rf appcat component-appcat component-spks-crossplane kindev
@@ -75,8 +76,7 @@ push-spks:
 	cd ../component-exporter-filterproxy && \
 	make push-non-converged && \
 	cd .. && \
-	$(MAKE) export-cluster-env-multi && \
-	$(MAKE) patch-keycloak-composition FORGEJO_REPO=gitea_admin/control-plane
+	cd appcat-charts && $(MAKE) push-local
 
 .PHONY: export-cluster-env-single # Export environment variables for e2e tests in single cluster mode (converged)
 export-cluster-env-single:
