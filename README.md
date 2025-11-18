@@ -82,3 +82,13 @@ inventage_registry_username=<username>
 ```
 
 The credentials are available in vault
+
+### Local registry
+
+The devcontainer will expose a local registry.
+It's accessible via `localhost:5000` from the host as well as for pulling images.
+If it's used with `provider-helm` to provision charts the chart registry has to be set to `registry.kube-system.svc.cluster.local:5000`
+
+Please add `registry.127.0.0.1.nip.io:8443` and `localhost:5000` as insecure registries to the docker configuration.
+
+SPKS is configured to take the mariadb chart from the local registry.
