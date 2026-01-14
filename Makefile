@@ -61,8 +61,10 @@ push-non-converged: ## Push AppCat configuration non-converged mode to local for
 	$(MAKE) patch-keycloak-composition FORGEJO_REPO=gitea_admin/control-plane
 
 push-spks: DEBUG=true
+push-spks: HOST=$(shell docker inspect kindev-control-plane | jq '.[0].NetworkSettings.Networks.kind.Gateway')
 push-spks:
 	yq '.parameters.spks_crossplane.proxyFunction |= $(DEBUG)' component-spks-crossplane/tests/control-plane.yml | diff -B component-spks-crossplane/tests/control-plane.yml - | patch component-spks-crossplane/tests/control-plane.yml -
+	yq '.parameters.spks_crossplane.grpcEndpoint |= $(HOST)+":9443"' component-spks-crossplane/tests/control-plane.yml | diff -B component-spks-crossplane/tests/control-plane.yml - | patch component-spks-crossplane/tests/control-plane.yml -
 	cd component-spks-crossplane && \
 	make push-non-converged && \
 	cd ../kindev && \
