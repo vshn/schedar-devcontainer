@@ -34,6 +34,10 @@ push-golden: HOST=$(shell docker inspect kindev-control-plane | jq '.[0].Network
 push-golden: ## Push AppCat configuration converged mode to local forgejo. By default it will try to connect to AppCat running in debug mode. Use `-e DEBUG=false` to run against containers in the cluster
 	yq '.parameters.appcat.proxyFunction |= $(DEBUG)' component-appcat/tests/dev.yml | diff -B component-appcat/tests/dev.yml - | patch component-appcat/tests/dev.yml -
 	yq '.parameters.appcat.grpcEndpoint |= $(HOST)+":9443"' component-appcat/tests/dev.yml | diff -B component-appcat/tests/dev.yml - | patch component-appcat/tests/dev.yml -
+	@echo "Copying TLS certificate to syn-crossplane namespace..."
+	@kubectl get secret tls-server-certificate -n kube-system -o yaml | \
+		sed 's/namespace: kube-system/namespace: syn-crossplane/' | \
+		kubectl apply -f - || true
 	cd component-appcat && \
 	make push-golden && \
 	cd .. && \
