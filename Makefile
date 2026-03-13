@@ -20,32 +20,54 @@ setup-spks: ## Setup spks kindev environment
 	make spks
 	cp kindev/.kind/kind-config ~/.kube/config
 
+CLUSTER_PROVIDER ?= kind
+
 setup-kindev: ## Setup kindev environment
 	cd kindev && \
-	make vshnall
+	make vshnall CLUSTER_PROVIDER=$(CLUSTER_PROVIDER)
+ifeq ($(CLUSTER_PROVIDER),talos)
+	cp kindev/.kind/talos-kubeconfig ~/.kube/config
+else
 	cp kindev/.kind/kind-config ~/.kube/config
+endif
 
 clean-kindev: ## Clean kindev
 	cd kindev && \
-	make clean
+	make clean CLUSTER_PROVIDER=$(CLUSTER_PROVIDER)
+
+ifeq ($(CLUSTER_PROVIDER),talos)
+APPCAT_TEST_FILE ?= dev-talos.yml
+APPCAT_INSTANCE ?= dev-talos
+else
+APPCAT_TEST_FILE ?= dev.yml
+APPCAT_INSTANCE ?= dev
+endif
 
 push-golden: DEBUG=true
+ifeq ($(CLUSTER_PROVIDER),talos)
+push-golden: HOST=$(shell docker network inspect kindev-talos --format '"{{range .IPAM.Config}}{{.Gateway}}{{end}}"')
+else
 push-golden: HOST=$(shell docker inspect kindev-control-plane | jq '.[0].NetworkSettings.Networks.kind.Gateway')
+endif
 push-golden: ## Push AppCat configuration converged mode to local forgejo. By default it will try to connect to AppCat running in debug mode. Use `-e DEBUG=false` to run against containers in the cluster
-	yq '.parameters.appcat.proxyFunction |= $(DEBUG)' component-appcat/tests/dev.yml | diff -B component-appcat/tests/dev.yml - | patch component-appcat/tests/dev.yml -
-	yq '.parameters.appcat.grpcEndpoint |= $(HOST)+":9443"' component-appcat/tests/dev.yml | diff -B component-appcat/tests/dev.yml - | patch component-appcat/tests/dev.yml -
+	yq '.parameters.appcat.proxyFunction |= $(DEBUG)' component-appcat/tests/$(APPCAT_TEST_FILE) | diff -B component-appcat/tests/$(APPCAT_TEST_FILE) - | patch component-appcat/tests/$(APPCAT_TEST_FILE) -
+	yq '.parameters.appcat.grpcEndpoint |= $(HOST)+":9443"' component-appcat/tests/$(APPCAT_TEST_FILE) | diff -B component-appcat/tests/$(APPCAT_TEST_FILE) - | patch component-appcat/tests/$(APPCAT_TEST_FILE) -
 	@echo "Copying TLS certificate to syn-crossplane namespace..."
 	@kubectl get secret tls-server-certificate -n kube-system -o yaml | \
 		sed 's/namespace: kube-system/namespace: syn-crossplane/' | \
 		kubectl apply -f - || true
 	cd component-appcat && \
-	make push-golden && \
+	make push-golden instance=$(APPCAT_INSTANCE) && \
 	cd .. && \
 	$(MAKE) export-cluster-env-single && \
-	$(MAKE) patch-keycloak-composition FORGEJO_REPO=gitea_admin/appcat
+	$(if $(filter talos,$(CLUSTER_PROVIDER)),true,$(MAKE) patch-keycloak-composition FORGEJO_REPO=gitea_admin/appcat)
 
 push-non-converged: DEBUG=true
+ifeq ($(CLUSTER_PROVIDER),talos)
+push-non-converged: HOST=$(shell docker inspect kindev-talos-controlplane-1 | jq '.[0].NetworkSettings.Networks["kindev-talos"].Gateway')
+else
 push-non-converged: HOST=$(shell docker inspect kindev-control-plane | jq '.[0].NetworkSettings.Networks.kind.Gateway')
+endif
 push-non-converged: ## Push AppCat configuration non-converged mode to local forgejo. By default it will try to connect to AppCat running in debug mode. Use `-e DEBUG=false` to run against containers in the cluster
 	yq '.parameters.appcat.proxyFunction |= $(DEBUG)' component-appcat/tests/control-plane.yml | diff -B component-appcat/tests/control-plane.yml - | patch component-appcat/tests/control-plane.yml -
 	yq '.parameters.appcat.grpcEndpoint |= $(HOST)+":9443"' component-appcat/tests/control-plane.yml | diff -B component-appcat/tests/control-plane.yml - | patch component-appcat/tests/control-plane.yml -
@@ -84,15 +106,21 @@ push-spks:
 	cd .. && \
 	cd appcat-charts && $(MAKE) push-local
 
+ifeq ($(CLUSTER_PROVIDER),talos)
+CLUSTER_KUBECONFIG_FILE ?= talos-kubeconfig
+else
+CLUSTER_KUBECONFIG_FILE ?= kind-config
+endif
+
 .PHONY: export-cluster-env-single # Export environment variables for e2e tests in single cluster mode (converged)
 export-cluster-env-single:
 	@rm -f component-appcat/.env || true
-	@cp kindev/.kind/kind-config kindev/.kind/in-cluster-kind-config && \
+	@cp kindev/.kind/$(CLUSTER_KUBECONFIG_FILE) kindev/.kind/in-cluster-kind-config && \
     	yq -i '.clusters[0].cluster.server = "https://kubernetes.default.svc:443"' kindev/.kind/in-cluster-kind-config
 	echo "export IN_CLUSTER_CONTROL_PLANE_KUBECONFIG=../kindev/.kind/in-cluster-kind-config" >> component-appcat/.env; \
 	echo "export IN_CLUSTER_SERVICE_CLUSTER_KUBECONFIG=../kindev/.kind/in-cluster-kind-config" >> component-appcat/.env; \
-	echo "export CONTROL_PLANE_KUBECONFIG_CONTENT='$$(cat kindev/.kind/kind-config | base64 -w 0)'" >> component-appcat/.env; \
-	echo "export SERVICE_CLUSTER_KUBECONFIG_CONTENT='$$(cat kindev/.kind/kind-config | base64 -w 0)'" >> component-appcat/.env; \
+	echo "export CONTROL_PLANE_KUBECONFIG_CONTENT='$$(cat kindev/.kind/$(CLUSTER_KUBECONFIG_FILE) | base64 -w 0)'" >> component-appcat/.env; \
+	echo "export SERVICE_CLUSTER_KUBECONFIG_CONTENT='$$(cat kindev/.kind/$(CLUSTER_KUBECONFIG_FILE) | base64 -w 0)'" >> component-appcat/.env; \
 
 .PHONY: export-cluster-env-multi # Export environment variables for e2e tests in multi cluster mode (non-converged)
 export-cluster-env-multi:
