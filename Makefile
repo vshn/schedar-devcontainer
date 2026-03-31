@@ -200,7 +200,7 @@ check-docker-creds:
 		echo "ERROR: Docker credentials file '$(DOCKER_CREDS_FILE)' not found!"; \
 		echo ""; \
 		echo "Create it with:"; \
-		echo "  cat > .docker-credentials << EOF"; \
+		echo "  cat > $(DOCKER_CREDS_FILE) << EOF"; \
 		echo "  inventage_registry_username=your-username"; \
 		echo "  inventage_registry_password=your-password"; \
 		echo "  EOF"; \
