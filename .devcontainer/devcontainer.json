@@ -14,7 +14,7 @@
       "version": "latest",
       "moby": true
     },
-    "ghcr.io/mikaello/devcontainer-features/modern-shell-utils:2.0.0": {},
+    "ghcr.io/mikaello/devcontainer-features/modern-shell-utils:3.0.0": {},
     "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
       "minikube": "none",
       "helm": "v3.19.2"
